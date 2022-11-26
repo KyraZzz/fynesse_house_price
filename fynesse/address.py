@@ -66,9 +66,9 @@ def get_train_dataset(conn, latitude, longitude, date, train_box_width=0.02, tra
           SELECT * from `prices_coordinates_data`;
         """
     try:
-        cur = conn.cursor()
-        cur.execute(sql)
-        rows = cur.fetchall()
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            rows = cur.fetchall()
     except:
         raise Exception(
             "Unable to select all rows in the table `prices_coordinates_data`")
@@ -148,10 +148,12 @@ def merge_OSM_features(df, pois_box_width=0.005, pois_box_height=0.005):
     :param pois_box_height: the height of the bounding box for searching POIs
     :return: a dataframe combined the raw train dataset with OSM features
     """
-    geo_list = [(float(df.iloc[id]['lattitude']), float(
-        df.iloc[id]['longitude'])) for id in range(len(df))]
-    df_OSM = get_POIs_for_list(geo_list, pois_box_width, pois_box_height)
-    return pd.concat((df, df_OSM), axis=1)
+    if 'lattitude' in df.columns and 'longitude' in df.columns:
+        geo_list = [(float(df.iloc[id]['lattitude']), float(
+            df.iloc[id]['longitude'])) for id in range(len(df))]
+        df_OSM = get_POIs_for_list(geo_list, pois_box_width, pois_box_height)
+        return pd.concat((df, df_OSM), axis=1)
+    return df
 
 
 def one_hot_df(df, columns=None, unique_vals_columns=None):
@@ -162,12 +164,13 @@ def one_hot_df(df, columns=None, unique_vals_columns=None):
     :return: a DataFrame with all qualitative data columns converted into quantitative data columns
     """
     if columns is None:
-        columns = ['property_type']
+        return df
     for id, col in enumerate(columns):
         if col in df.columns:
             if unique_vals_columns is None or unique_vals_columns[id] is None:
                 unique_vals = df[col].unique()
-            unique_vals = unique_vals_columns[id]
+            else:
+                unique_vals = unique_vals_columns[id]
             for val in unique_vals:
                 df[f"{col}_{val}"] = np.where(df[col] == val, 1, 0)
     return df
@@ -185,7 +188,8 @@ def preprocess_df(df, pois_box_width=0.005, pois_box_height=0.005, columns=None,
              apply one-hot encoding, only preserve numeric columns)
     """
     # Get rid of rows with missing price data
-    df = df[df['price'] > 0]
+    if 'price' in df.columns:
+        df = df[df['price'] > 0]
     # Drop rows with NaN values
     df = df.dropna(axis=0)
     # Drop db_ids column
@@ -241,7 +245,7 @@ def train_kfold_eval(X, log_y, n_fold, kfold, model):
     :param n_fold: number of folds in cross validation
     :param kfold: a generator KFold object
     :param model: the model for curve fitting
-    :return: the average root mean squared error across n folds
+    :return: the average root mean square error across n folds
     """
     cnt = 0
     rmse_score = 0
@@ -322,40 +326,26 @@ def predict_price(latitude, longitude, date, property_type,
     :param verbose: whether to log processing information
     :return: a DataFrame with each entry: ['linear_model_name', 'predict_price', 'average_RMSE']
     """
-    colorList = {'red': '\033[91m', 'green': '\033[92m', 'yellow': '\033[93m'}
+    colorList = {'red': '\033[91m', 'green': '\033[92m', 'blue': '\033[94m'}
     score_df = pd.DataFrame(
         columns=['linear_model_name', 'predict_price', 'average_RMSE'])
 
     try:
-        print(f"{colorList['yellow']}" + "Get database connection...")
-        conn = create_connection(user=credentials["username"],
-                                 password=credentials["password"],
-                                 host=database_details["url"],
-                                 database="property_prices")
-        print(f"{colorList['green']}" +
-              "Database connection set up successfully.")
-    except:
-        raise Exception(f"{colorList['red']}" +
-                        "Unable to connect to the database.")
-
-    try:
-        print(f"{colorList['yellow']}" +
+        print(f"{colorList['blue']}" +
               f"Get optimal train dataset with size within range: [{train_size_lb}, {train_size_ub}]...")
         df = get_optimal_train_dataset(conn, latitude, longitude, date,
                                        property_type, train_size_lb, train_size_ub,
                                        train_box_width, train_box_height,
                                        diff_lb, diff_ub, verbose)
-        unique_property = df['property_type'].unique()
         print(f"{colorList['green']}" + "Optimal train dataset fetched.")
     except:
         raise Exception(f"{colorList['red']}" +
                         "Unable to featch optimal train dataset.")
 
     try:
-        print(f"{colorList['yellow']}" +
+        print(f"{colorList['blue']}" +
               f"Preprocess dataframe (merge with OSM features)...")
-        df = preprocess_df(
-            df, columns=['property_type'], unique_vals_columns=[unique_property])
+        df = preprocess_df(df)
         print(f"{colorList['green']}" + f"Dataset ready for model training.")
     except:
         raise Exception(f"{colorList['red']}" +
@@ -367,12 +357,9 @@ def predict_price(latitude, longitude, date, property_type,
         print(f"{colorList['green']}" + f"Visualise price distribution.")
         visualise_price_distribution(y, log_y)
         X_pred = get_POIs_for_list([(latitude, longitude)])
-        X_pred['property_type'] = property_type
-        X_pred = preprocess_df(
-            X_pred, columns=['property_type'], unique_vals_columns=[unique_property])
         print(f"{colorList['green']}" + f"Evalutation dataset constructed.")
         model_list = [RidgeCV(), BayesianRidge(), TweedieRegressor(power=0)]
-        print(f"{colorList['yellow']}" +
+        print(f"{colorList['blue']}" +
               "Model training, testing and evaluating ...")
         for model in model_list:
             y_pred, avg_rmse_score = train_eval_predict(
@@ -405,37 +392,25 @@ def predict_price_fix(latitude, longitude, date, property_type, train_box_width=
     :param verbose: whether to log processing information
     :return: a DataFrame with each entry: ['linear_model_name', 'predict_price', 'average_RMSE']
     """
-    colorList = {'red': '\033[91m', 'green': '\033[92m', 'yellow': '\033[93m'}
+    colorList = {'red': '\033[91m', 'green': '\033[92m', 'blue': '\033[94m'}
     score_df = pd.DataFrame(
         columns=['linear_model_name', 'predict_price', 'average_RMSE'])
 
     try:
-        print(f"{colorList['yellow']}" + "Get database connection...")
-        conn = create_connection(user=credentials["username"],
-                                 password=credentials["password"],
-                                 host=database_details["url"],
-                                 database="property_prices")
-        print(f"{colorList['green']}" +
-              "Database connection set up successfully.")
-    except:
-        raise Exception(f"{colorList['red']}" +
-                        "Unable to connect to the database.")
-
-    try:
-        print(f"{colorList['yellow']}" + f"Get train dataset ...")
+        print(f"{colorList['blue']}" + f"Get train dataset ...")
         df = get_train_dataset(conn, latitude, longitude, date, train_box_width,
                                train_box_height, diff_lb, diff_ub, verbose)
-        unique_property = df['property_type'].unique()
+        df = filter_property_type(df, property_type)
+        df = df.reset_index(drop=True)
         print(f"{colorList['green']}" + "Optimal train dataset fetched.")
     except:
         raise Exception(f"{colorList['red']}" +
                         "Unable to featch optimal train dataset.")
 
     try:
-        print(f"{colorList['yellow']}" +
+        print(f"{colorList['blue']}" +
               f"Preprocess dataframe (merge with OSM features)...")
-        df = preprocess_df(
-            df, columns=['property_type'], unique_vals_columns=[unique_property])
+        df = preprocess_df(df)
         print(f"{colorList['green']}" + f"Dataset ready for model training.")
     except:
         raise Exception(f"{colorList['red']}" +
@@ -447,12 +422,9 @@ def predict_price_fix(latitude, longitude, date, property_type, train_box_width=
         print(f"{colorList['green']}" + f"Visualise price distribution.")
         visualise_price_distribution(y, log_y)
         X_pred = get_POIs_for_list([(latitude, longitude)])
-        X_pred['property_type'] = property_type
-        X_pred = preprocess_df(
-            X_pred, columns=['property_type'], unique_vals_columns=[unique_property])
         print(f"{colorList['green']}" + f"Evalutation dataset constructed.")
         model_list = [RidgeCV(), BayesianRidge(), TweedieRegressor(power=0)]
-        print(f"{colorList['yellow']}" +
+        print(f"{colorList['blue']}" +
               "Model training, testing and evaluating ...")
         for model in model_list:
             y_pred, avg_rmse_score = train_eval_predict(
@@ -488,24 +460,12 @@ def predict_price_relaxed_property(latitude, longitude, date, property_type,
     :param verbose: whether to log processing information
     :return: a DataFrame with each entry: ['linear_model_name', 'predict_price', 'average_RMSE']
     """
-    colorList = {'red': '\033[91m', 'green': '\033[92m', 'yellow': '\033[93m'}
+    colorList = {'red': '\033[91m', 'green': '\033[92m', 'blue': '\033[94m'}
     score_df = pd.DataFrame(
         columns=['linear_model_name', 'predict_price', 'average_RMSE'])
 
     try:
-        print(f"{colorList['yellow']}" + "Get database connection...")
-        conn = create_connection(user=credentials["username"],
-                                 password=credentials["password"],
-                                 host=database_details["url"],
-                                 database="property_prices")
-        print(f"{colorList['green']}" +
-              "Database connection set up successfully.")
-    except:
-        raise Exception(f"{colorList['red']}" +
-                        "Unable to connect to the database.")
-
-    try:
-        print(f"{colorList['yellow']}" +
+        print(f"{colorList['blue']}" +
               f"Get optimal train dataset with size within range: [{train_size_lb}, {train_size_ub}]...")
         property_type_all = ['F', 'S', 'D', 'T']
         df = get_optimal_train_dataset(conn, latitude, longitude, date,
@@ -519,7 +479,7 @@ def predict_price_relaxed_property(latitude, longitude, date, property_type,
                         "Unable to featch optimal train dataset.")
 
     try:
-        print(f"{colorList['yellow']}" +
+        print(f"{colorList['blue']}" +
               f"Preprocess dataframe (merge with OSM features)...")
         df = preprocess_df(
             df, columns=['property_type'], unique_vals_columns=[unique_property])
@@ -539,7 +499,7 @@ def predict_price_relaxed_property(latitude, longitude, date, property_type,
             X_pred, columns=['property_type'], unique_vals_columns=[unique_property])
         print(f"{colorList['green']}" + f"Evalutation dataset constructed.")
         model_list = [RidgeCV(), BayesianRidge(), TweedieRegressor(power=0)]
-        print(f"{colorList['yellow']}" +
+        print(f"{colorList['blue']}" +
               "Model training, testing and evaluating ...")
         for model in model_list:
             y_pred, avg_rmse_score = train_eval_predict(
