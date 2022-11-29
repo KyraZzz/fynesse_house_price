@@ -3,7 +3,6 @@ from .config import *
 import os
 import yaml
 from getpass import getpass
-import urllib.request as request
 import pandas as pd
 import pymysql
 import numpy as np
