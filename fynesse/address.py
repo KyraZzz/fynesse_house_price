@@ -13,8 +13,7 @@ from termcolor import colored
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from assess import get_bounding_box, get_POIs_for_list
-from access import join_bbox_period, prices_coordinates_data_to_df
+from access import prices_coordinates_data_to_df, join_bbox_period, get_bounding_box
 warnings.filterwarnings("ignore")
 
 """Address a particular question that arises from the data"""

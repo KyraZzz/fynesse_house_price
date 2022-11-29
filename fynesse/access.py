@@ -11,6 +11,7 @@ from tqdm.notebook import tqdm
 import zipfile
 import requests
 import csv
+import osmnx as ox
 
 
 def save_credentials():
@@ -646,7 +647,71 @@ def prices_coordinates_data_to_df(rows):
                                        'db_id'])
 
 
-def data():
+def get_bounding_box(latitude, longitude, box_width=0.005, box_height=0.005):
+    """ Construct a bounding box for the point specified in latitude and longitude.
+    :param latitude: the latitude of the point
+    :param longitude: the longitude of the point
+    :param box_width: the width of the bounding box
+    :param box_height: the height of the bounding box
+    :return: the north, south, west and east coordinates for the bounding box
+    """
+    north = latitude + box_height/2
+    south = latitude - box_height/2
+    west = longitude - box_width/2
+    east = longitude + box_width/2
+    return north, south, west, east
+
+
+def get_pois(north, south, west, east):
+    """ Retrieve the point of interests within the bounding box.
+    :param north: the north coordinate of the bounding box
+    :param south: the south coordinate of the bounding box
+    :param west: the west coordinate of the bounding box
+    :param east: the east coordinate of the bounding box
+    :return: POIs in a GeoPandas Dataframe
+    """
+
+    # Define tags from a list of available POIs: https://wiki.openstreetmap.org/wiki/Map_features
+    tags = {"aeroway": True,
+            "amenity": True,
+            "building": True,
+            "highway": True,
+            "landuse": True,
+            "public_transport": True,
+            "historic": True,
+            "leisure": True,
+            "shop": True,
+            "tourism": True,
+            "healthcare": True,
+            "sport": True}
+
+    # Retrieve POIs
+    pois = ox.geometries_from_bbox(north, south, east, west, tags)
+
+    return pois
+
+
+def get_pois_by_key(pois, key):
+    """ Extract relevant POIS with a key.
+    :param pois: POIs in a GeoPandas Dataframe
+    :param key: a column name of the POI
+    :return: POIs in a GeoPandas DataFrame with entries filtered by key
+    """
+    if key not in pois.columns:
+        return None
+
+    pois_by_key = pois[pois[key].notnull()]
+    tags = ["name",
+            "geometry",
+            "addr:city",
+            "addr:postcode"]
+    tags.append(key)
+
+    present_keys = [tag for tag in tags if tag in pois.columns]
+    return pois_by_key[present_keys]
+
+
+def config_price_data():
     # Save credentials
     save_credentials()
 
