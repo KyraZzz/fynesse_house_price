@@ -26,31 +26,6 @@ def save_credentials():
         yaml.dump(credentials_dict, file)
 
 
-def connect_to_database(username, password, url):
-    """ Connect to the database with the username and password authentication.
-    :param username: the username for database access
-    :param password: the password for database access
-    :param url: the database access point url
-    :return: None
-    """
-    %load_ext sql
-    %sql mariadb+pymysql: //$username: $password @$url?local_infile = 1
-    print(f"Database connected.")
-
-
-def create_database_property_prices():
-    """ Create a database called `property_prices`
-    :return: None
-    """
-    %load_ext sql
-    %sql SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO"
-    %sql SET time_zone = "+00:00"
-
-    %sql CREATE DATABASE IF NOT EXISTS `property_prices` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin
-    %sql USE `property_prices`
-    print(f"Database `property_prices` created.")
-
-
 def create_connection(user, password, host, database, port=3306):
     """ Create a database connection to the MariaDB database
         specified by the host url and database name.
@@ -80,10 +55,29 @@ def create_database_property_prices(conn):
     :param conn: a Connection object to the database
     :return: None
     """
-    %load_ext sql
-    %sql SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO"
-    %sql SET time_zone = "+00:00"
+    # Set SQL_MODE
+    sql = """
+        SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+        """
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            conn.commit()
+    except:
+        raise Exception("Unable to set SQL_MODE.")
 
+    # Set time_zone
+    sql = """
+        SET time_zone = "+00:00";
+        """
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            conn.commit()
+    except:
+        raise Exception("Unable to set time_zone.")
+
+    # Create database `property_prices` if not exists
     sql = """
         CREATE DATABASE IF NOT EXISTS `property_prices` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
         """
@@ -93,6 +87,8 @@ def create_database_property_prices(conn):
             conn.commit()
     except:
         raise Exception("Unable to create the database `property_prices`.")
+
+    # Use database `property_prices`
     sql = "USE `property_prices`;"
     try:
         with conn.cursor() as cur:
@@ -100,6 +96,7 @@ def create_database_property_prices(conn):
             conn.commit()
     except:
         raise Exception("Unable to use the database `property_prices`.")
+
     print(f"Database `property_prices` created.")
 
 
@@ -725,9 +722,6 @@ def config_price_data():
     username = credentials["username"]
     password = credentials["password"]
     url = database_details["url"]
-
-    # Connect to the database
-    connect_to_database(username, password, url)
 
     # Set up a database connection
     conn = create_connection(user=credentials["username"],

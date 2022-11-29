@@ -1,6 +1,5 @@
-# This file contains code for suporting addressing questions in the data
+from access import prices_coordinates_data_to_df, join_bbox_period, get_bounding_box
 import datetime
-from tqdm.notebook import tqdm
 import warnings
 import pandas as pd
 import numpy as np
@@ -9,11 +8,11 @@ from sklearn.model_selection import KFold
 from sklearn.preprocessing import RobustScaler
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import RidgeCV, TweedieRegressor, BayesianRidge
-from termcolor import colored
 import seaborn as sns
 import matplotlib.pyplot as plt
+from IPython.display import set_matplotlib_formats
+set_matplotlib_formats('svg')
 
-from access import prices_coordinates_data_to_df, join_bbox_period, get_bounding_box
 warnings.filterwarnings("ignore")
 
 """Address a particular question that arises from the data"""
