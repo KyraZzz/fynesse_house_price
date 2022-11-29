@@ -1,4 +1,4 @@
-from access import prices_coordinates_data_to_df, join_bbox_period, get_bounding_box
+from .access import prices_coordinates_data_to_df, join_bbox_period, get_bounding_box
 import datetime
 import warnings
 import pandas as pd

@@ -4,7 +4,7 @@ import ipywidgets as widgets
 from numpy.linalg import eig
 from sklearn.decomposition import PCA
 import seaborn as sns
-from access import config_price_data, get_bounding_box, get_pois, get_pois_by_key
+from .access import config_price_data, get_bounding_box, get_pois, get_pois_by_key
 import pandas as pd
 import numpy as np
 import mlai.plot as plot
