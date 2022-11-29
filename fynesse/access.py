@@ -352,7 +352,7 @@ def create_table_postcode_data(conn):
         `northing` int unsigned,
         `positional_quality_indicator` int NOT NULL,
         `country` enum('England', 'Wales', 'Scotland', 'Northern Ireland', 'Channel Islands', 'Isle of Man') NOT NULL,
-        `latitude` decimal(11,8) NOT NULL,
+        `lattitude` decimal(11,8) NOT NULL,
         `longitude` decimal(10,8) NOT NULL,
         `postcode_no_space` tinytext COLLATE utf8_bin NOT NULL,
         `postcode_fixed_width_seven` varchar(7) COLLATE utf8_bin NOT NULL,
@@ -431,7 +431,7 @@ def postcode_data_to_df(rows):
     """
     return pd.DataFrame(rows, columns=['postcode', 'status', 'usertype',
                                        'easting', 'northing', 'positional_quality_indicator', 'country',
-                                       'latitude', 'longitude', 'postcode_no_space',
+                                       'lattitude', 'longitude', 'postcode_no_space',
                                        'postcode_fixed_width_seven', 'postcode_fixed_width_eight',
                                        'postcode_area', 'postcode_district', 'postcode_sector', 'outcode',
                                        'incode', 'db_id'])
@@ -514,7 +514,7 @@ def join_region_period(conn, region, time_period_lb, time_period_ub, save_dir=".
                  pp_data.new_build_flag as new_build_flag, pp_data.tenure_type as tenure_type, 
                  pp_data.locality as locality, pp_data.town_city as town_city, 
                  pp_data.district as district, pp_data.county as county, 
-                 postcode_data.country as country, postcode_data.latitude as latitude, 
+                 postcode_data.country as country, postcode_data.lattitude as latitude, 
                  postcode_data.longitude as longitude 
           FROM pp_data
           INNER JOIN postcode_data
@@ -586,15 +586,15 @@ def join_bbox_period(conn, north, south, west, east, time_period_lb, time_period
                  pp_data.new_build_flag as new_build_flag, pp_data.tenure_type as tenure_type, 
                  pp_data.locality as locality, pp_data.town_city as town_city, 
                  pp_data.district as district, pp_data.county as county, 
-                 postcode_data.country as country, postcode_data.latitude as latitude, 
+                 postcode_data.country as country, postcode_data.lattitude as latitude, 
                  postcode_data.longitude as longitude 
           FROM pp_data 
           INNER JOIN postcode_data
           ON pp_data.postcode = postcode_data.postcode
           WHERE pp_data.date_of_transfer >= %s 
           AND pp_data.date_of_transfer <= %s
-          AND postcode_data.latitude <= %s 
-          AND postcode_data.latitude >= %s
+          AND postcode_data.lattitude <= %s 
+          AND postcode_data.lattitude >= %s
           AND postcode_data.longitude >= %s
           AND postcode_data.longitude <= %s;
           """
@@ -632,6 +632,18 @@ def join_bbox_period(conn, north, south, west, east, time_period_lb, time_period
             conn.commit()
     except:
         raise Exception("Unable to load data into `prices_coordinates_data`.")
+
+
+def prices_coordinates_data_to_df(rows):
+    """ Convert query results into a DataFrame format for `prices_coordinates_data` table.
+    :param rows: query results in rows
+    :return: query results in a DataFrame
+    """
+    return pd.DataFrame(rows, columns=['price', 'date_of_transfer', 'postcode',
+                                       'property_type', 'new_build_flag', 'tenure_type', 'locality',
+                                       'town_city', 'district', 'county',
+                                       'country', 'latitude', 'longitude',
+                                       'db_id'])
 
 
 def data():
