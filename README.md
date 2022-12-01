@@ -14,7 +14,35 @@ The figure below summarised what I have learned and what I have done in this cou
 %pip uninstall --yes matplotlib
 %pip install matplotlib==3.1.3
 ```
-### Set up a database and upload data to the database (skip if already configured database)
+### Upload data to the database
+```python
+# Import libraries
+from fynesse.access import config_credentials, create_connection, config_price_data
+
+# Database url
+database_details = {"url": <your-database-connection-endpoint-url>, 
+                    "port": <your-database-connection-endpoint-port>}
+
+# Store credentials
+username, password, url = config_credentials(url=database_details["url"], port=database_details["port"])
+
+# Create database `property_prices`
+%load_ext sql
+%sql mariadb+pymysql://$username:$password@$url?local_infile=1
+%%sql
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+CREATE DATABASE IF NOT EXISTS `property_prices` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
+USE `property_prices`;
+
+# Set up a database connection
+conn = create_connection(username, password, url, database="property_prices")
+
+# Upload data to the database
+config_price_data(conn, year_lb = 2021, year_ub = 2022)
+```
+Here are the result for the above example:
+![database upload](images/database.png)
 ### Assess OSM features
 ```python
 # Import modules
@@ -31,8 +59,11 @@ Here are the result for the above example:
 from fynesse.access import config_credentials, create_connection 
 from fynesse.address import predict_price, predict_price_fix, predict_price_relaxed_property
 
+# Database url
+database_details = {"url": <your-database-connection-endpoint-url>, 
+                    "port": <your-database-connection-endpoint-port>}
 # Store credentials
-username, password, url = config_credentials()
+username, password, url = config_credentials(url=database_details["url"], port=database_details["port"])
 # Set up a database connection
 conn = create_connection(username, password, url, database="property_prices")
 
