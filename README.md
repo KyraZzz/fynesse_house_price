@@ -1,8 +1,11 @@
 # House price prediction assessment
 ## Brief overview of fynesse pipeline
-The figure below summarised what I have learned and what I have done in this course assessment. I followed the iterative fynesse pipeline which has three stages: access, assess and address.
+The figure below summarised what I have learned and what I have done in this course assessment. I followed the iterative fynesse pipeline which has three stages: access, assess and address. 
+
+For a detailed documentation of the code logic, please refer to the [notebook](https://github.com/KyraZzz/fynesse_house_price/blob/main/notebooks/yz709_notebook.ipynb), note that a preview of the notebook may not display all images properly, so please load the [notebook](https://github.com/KyraZzz/fynesse_house_price/blob/main/notebooks/yz709_notebook.ipynb) in Colab or Jupyter Notebook.
 ![Overview](./images/final_overview.jpg)
-## How to use the package?
+
+## How to use the library?
 ### Install libraries
 ```python
 # Install the library
