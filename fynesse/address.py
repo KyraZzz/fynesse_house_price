@@ -238,7 +238,7 @@ def visualise_price_distribution(y, log_y):
 
 
 def train_kfold_eval(X, log_y, n_fold, kfold, model):
-    """ Train and evluate the model with cross validation.
+    """ Train and evaluate the model with cross validation.
     :param X: a DataFrame with only independent features
     :param log_y: log version of the dependent feature (log(prices))
     :param n_fold: number of folds in cross validation
@@ -339,6 +339,7 @@ def predict_price(latitude, longitude, date, property_type, conn,
                                        diff_lb, diff_ub, verbose)
         print(f"{colorList['green']}" + "Optimal train dataset fetched.")
     except:
+        conn.close()
         raise Exception(f"{colorList['red']}" +
                         "Unable to featch optimal train dataset.")
 
@@ -348,6 +349,7 @@ def predict_price(latitude, longitude, date, property_type, conn,
         df = preprocess_df(df)
         print(f"{colorList['green']}" + f"Dataset ready for model training.")
     except:
+        conn.close()
         raise Exception(f"{colorList['red']}" +
                         "Unable to preprocess the dataframe.")
 
@@ -369,6 +371,7 @@ def predict_price(latitude, longitude, date, property_type, conn,
         print(f"{colorList['green']}" + "Results:")
         print(score_df)
     except:
+        conn.close()
         raise Exception(
             f"{colorList['red']}" + "Unable to train, evaluate and test the models.")
 
@@ -405,6 +408,7 @@ def predict_price_fix(latitude, longitude, date, property_type, conn, train_box_
         df = df.reset_index(drop=True)
         print(f"{colorList['green']}" + "Optimal train dataset fetched.")
     except:
+        conn.close()
         raise Exception(f"{colorList['red']}" +
                         "Unable to featch optimal train dataset.")
 
@@ -414,6 +418,7 @@ def predict_price_fix(latitude, longitude, date, property_type, conn, train_box_
         df = preprocess_df(df)
         print(f"{colorList['green']}" + f"Dataset ready for model training.")
     except:
+        conn.close()
         raise Exception(f"{colorList['red']}" +
                         "Unable to preprocess the dataframe.")
 
@@ -435,6 +440,7 @@ def predict_price_fix(latitude, longitude, date, property_type, conn, train_box_
         print(f"{colorList['green']}" + "Results:")
         print(score_df)
     except:
+        conn.close()
         raise Exception(
             f"{colorList['red']}" + "Unable to train, evaluate and test the models.")
 
@@ -477,6 +483,7 @@ def predict_price_relaxed_property(latitude, longitude, date, property_type, con
         unique_property = df['property_type'].unique()
         print(f"{colorList['green']}" + "Optimal train dataset fetched.")
     except:
+        conn.close()
         raise Exception(f"{colorList['red']}" +
                         "Unable to featch optimal train dataset.")
 
@@ -487,6 +494,7 @@ def predict_price_relaxed_property(latitude, longitude, date, property_type, con
             df, columns=['property_type'], unique_vals_columns=[unique_property])
         print(f"{colorList['green']}" + f"Dataset ready for model training.")
     except:
+        conn.close()
         raise Exception(f"{colorList['red']}" +
                         "Unable to preprocess the dataframe.")
 
@@ -511,6 +519,7 @@ def predict_price_relaxed_property(latitude, longitude, date, property_type, con
         print(f"{colorList['green']}" + "Results:")
         print(score_df)
     except:
+        conn.close()
         raise Exception(
             f"{colorList['red']}" + "Unable to train, evaluate and test the models.")
 

@@ -707,9 +707,12 @@ def get_pois_by_key(pois, key):
     return pois_by_key[present_keys]
 
 
-def config_credentials():
+def config_credentials(url):
     """ Fetch and save credentials from users and set up a database connection.
-    :return: a Connection object to the database
+    :param url: URL to connect to database endpoint
+    :return: username for database connection
+    :return: password for database connection
+    :return: url for database connection
     """
     # Save credentials
     save_credentials()
@@ -725,12 +728,10 @@ def config_credentials():
     password = credentials["password"]
     url = database_details["url"]
 
-    # Set up a database connection
-    conn = create_connection(user=credentials["username"],
-                             password=credentials["password"],
-                             host=database_details["url"],
-                             database="property_prices")
-    return conn
+    # Construct a dataset folder if not exists
+    os.mkdir("./datasets")
+
+    return username, password, url
 
 
 def config_price_data(conn):
