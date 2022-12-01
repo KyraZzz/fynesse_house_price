@@ -4,7 +4,7 @@ import ipywidgets as widgets
 from numpy.linalg import eig
 from sklearn.decomposition import PCA
 import seaborn as sns
-from .access import config_credentials, create_connection, config_price_data, get_bounding_box, get_pois, get_pois_by_key
+from .access import get_bounding_box, get_pois, get_pois_by_key
 import pandas as pd
 import numpy as np
 import mlai.plot as plot
@@ -241,18 +241,10 @@ def plot_PCA_3d(corr):
     _ = interact(view, elevation=elevation_slider, azim=azim_slider)
 
 
-def data():
-    """Load the data from access and ensure missing values are correctly encoded as well as indices correct, column names informative, date and times correctly formatted. Return a structured data structure such as a data frame."""
-    # get a database connection
-    username, password, url = config_credentials()
-    conn = create_connection(username, password, url,
-                             database="property_prices")
-    # load price data
-    config_price_data(conn)
-
-
-def view(geo_list):
+def view(n=10, seed=42):
     """Provide a view of the data that allows the user to verify some aspect of its quality."""
+    # get a list of random locations
+    get_geo_list(n, seed)
     df = get_POIs_for_list(geo_list, box_width=0.005, box_height=0.005)
     # Visualise data using histograms
     df_as_histogram(df)

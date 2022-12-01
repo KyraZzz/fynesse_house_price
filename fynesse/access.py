@@ -739,9 +739,11 @@ def config_credentials(url=None, port=None):
     return username, password, url
 
 
-def config_price_data(conn):
+def config_price_data(conn, year_lb=1995, year_ub=2022):
     """ Config the dataset tables.
     :param conn: a Connection object
+    :param year_lb: the lower bound of the year for price dataset
+    :param year_ub: the upper bound of the year for price dataset
     :return: None
     """
 
@@ -761,11 +763,12 @@ def config_price_data(conn):
     create_table_pp_data(conn)
 
     # Construct a folder `datasets`
-    os.mkdir("./datasets")
+    if not os.path.exists("./datasets"):
+        os.makedirs("./datasets")
 
     # Download and upload data to `pp_data`
     dataset_downloads_uploads(
-        year_lb=1995, year_ub=2022, save_dir="./datasets", verbose=False, conn=conn)
+        year_lb, year_ub, save_dir="./datasets", verbose=False, conn=conn)
 
     # Download and extract contents from a zip file to construct the `postcode_data` table.
     download_postcode_data()

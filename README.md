@@ -3,9 +3,7 @@
 The figure below summarised what I have learned and what I have done in this course assessment. I followed the iterative fynesse pipeline that contains three stages: access, assess and address.
 ![Overview](./images/final_overview.jpg)
 ## How to use the package?
-### Step 1: Set up a database and upload data to the database
-### Step 2: Assess OSM features
-### Step 3: Address house price prediction problem
+### Install libraries
 ```python
 # Install the library
 %pip install git+https://github.com/KyraZzz/fynesse_house_price.git
@@ -15,7 +13,20 @@ The figure below summarised what I have learned and what I have done in this cou
 %pip install mlai
 %pip uninstall --yes matplotlib
 %pip install matplotlib==3.1.3
+```
+### Set up a database and upload data to the database (skip if already configured database)
+### Assess OSM features
+```python
+# Import modules
+from fynesse.assess import view
 
+# Visualise feature correlations
+view(n = 10, seed = 42)
+```
+Here are the result for the above example:
+![image](images/view.png)
+### Address house price prediction problem
+```python
 # Import modules
 from fynesse.access import config_credentials, create_connection 
 from fynesse.address import predict_price, predict_price_fix, predict_price_relaxed_property
