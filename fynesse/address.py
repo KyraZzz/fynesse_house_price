@@ -1,4 +1,5 @@
 from .access import prices_coordinates_data_to_df, join_bbox_period, get_bounding_box
+from .assess import get_POIs_for_list
 import datetime
 import warnings
 import pandas as pd
@@ -305,7 +306,7 @@ def train_eval_predict(X, log_y, n_fold, kfold, X_pred, model):
     return y_pred, avg_rmse_score
 
 
-def predict_price(latitude, longitude, date, property_type,
+def predict_price(latitude, longitude, date, property_type, conn,
                   train_size_lb=10, train_size_ub=20, train_box_width=0.03,
                   train_box_height=0.03, diff_lb=20, diff_ub=20, verbose=True):
     """ Predict the house price for a property at location with 
@@ -315,6 +316,7 @@ def predict_price(latitude, longitude, date, property_type,
     :param date: date in interest
     :param property_type: a single character describing the property type of the house at the given location,
                             (e.g., a single character in ['F', 'S', 'D', 'T'])
+    :param conn: a Connection object to the database
     :param train_size_lb: the lower bound of the train dataset size
     :param train_size_ub: the upper bound of the train dataset size
     :param train_box_width: the initial bounding box width of the train dataset
@@ -373,7 +375,7 @@ def predict_price(latitude, longitude, date, property_type,
     return score_df
 
 
-def predict_price_fix(latitude, longitude, date, property_type, train_box_width=0.03,
+def predict_price_fix(latitude, longitude, date, property_type, conn, train_box_width=0.03,
                       train_box_height=0.03, diff_lb=20, diff_ub=20, verbose=True):
     """ Predict the house price for a property at location with 
        a given latitude-longitude pair at a given date and with a given property type,
@@ -383,6 +385,7 @@ def predict_price_fix(latitude, longitude, date, property_type, train_box_width=
     :param date: date in interest
     :param property_type: a single character describing the property type of the house at the given location,
                             (e.g., a single character in ['F', 'S', 'D', 'T'])
+    :param conn: a Connection object to the database
     :param train_box_width: the initial bounding box width of the train dataset
     :param train_box_height: the initial bounding box height of the train dataset
     :param diff_lb: the initial lower bound of the date range in difference
@@ -438,7 +441,7 @@ def predict_price_fix(latitude, longitude, date, property_type, train_box_width=
     return score_df
 
 
-def predict_price_relaxed_property(latitude, longitude, date, property_type,
+def predict_price_relaxed_property(latitude, longitude, date, property_type, conn,
                                    train_size_lb=10, train_size_ub=20, train_box_width=0.03,
                                    train_box_height=0.03, diff_lb=20, diff_ub=20, verbose=True):
     """ Predict the house price for a property at location with 
@@ -449,6 +452,7 @@ def predict_price_relaxed_property(latitude, longitude, date, property_type,
     :param date: date in interest
     :param property_type: a single character describing the property type of the house at the given location,
                             (e.g., a single character in ['F', 'S', 'D', 'T'])
+    :param conn: a Connection object to the database
     :param train_size_lb: the lower bound of the train dataset size
     :param train_size_ub: the upper bound of the train dataset size
     :param train_box_width: the initial bounding box width of the train dataset

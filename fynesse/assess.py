@@ -12,6 +12,7 @@ import mlai
 import seaborn as sns
 import osmnx as ox
 import matplotlib.pyplot as plt
+from tqdm.notebook import tqdm
 from IPython.display import set_matplotlib_formats
 set_matplotlib_formats('svg')
 
@@ -63,10 +64,10 @@ def compare_places_pois_by_tag(place_name, locations, box_width, box_height, tag
     :param tags: a list of POI groups
     :return: one plot per tag per place
     """
-    fig, ax = plt.subplots(len(tags), len(place_names),
-                           figsize=(len(place_names) * 4, len(tags) * 4))
-    with tqdm(total=len(place_names) * len(tags)) as pbar:
-        for i, p in enumerate(place_names):
+    fig, ax = plt.subplots(len(tags), len(place_name),
+                           figsize=(len(place_name) * 4, len(tags) * 4))
+    with tqdm(total=len(place_name) * len(tags)) as pbar:
+        for i, p in enumerate(place_name):
             latitude, longitude = locations[i]
             north, south, west, east = get_bounding_box(
                 latitude, longitude, box_width, box_height)
