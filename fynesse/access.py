@@ -49,56 +49,6 @@ def create_connection(user, password, host, database, port=3306):
     return conn
 
 
-def create_database_property_prices(conn):
-    """ Create a database called `property_prices`
-    :param conn: a Connection object to the database
-    :return: None
-    """
-    # Set SQL_MODE
-    sql = """
-        SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-        """
-    try:
-        with conn.cursor() as cur:
-            cur.execute(sql)
-            conn.commit()
-    except:
-        raise Exception("Unable to set SQL_MODE.")
-
-    # Set time_zone
-    sql = """
-        SET time_zone = "+00:00";
-        """
-    try:
-        with conn.cursor() as cur:
-            cur.execute(sql)
-            conn.commit()
-    except:
-        raise Exception("Unable to set time_zone.")
-
-    # Create database `property_prices` if not exists
-    sql = """
-        CREATE DATABASE IF NOT EXISTS `property_prices` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin;
-        """
-    try:
-        with conn.cursor() as cur:
-            cur.execute(sql)
-            conn.commit()
-    except:
-        raise Exception("Unable to create the database `property_prices`.")
-
-    # Use database `property_prices`
-    sql = "USE `property_prices`;"
-    try:
-        with conn.cursor() as cur:
-            cur.execute(sql)
-            conn.commit()
-    except:
-        raise Exception("Unable to use the database `property_prices`.")
-
-    print(f"Database `property_prices` created.")
-
-
 def create_table_pp_data(conn):
     """ Create a fresh database table `pp_data`.
     :param conn: a Connection object to the database
@@ -746,9 +696,6 @@ def config_price_data(conn, year_lb=1995, year_ub=2022):
     :param year_ub: the upper bound of the year for price dataset
     :return: None
     """
-
-    # Create a database called `property_prices`
-    create_database_property_prices(conn)
 
     # Create a database table `pp_data`
     create_table_pp_data(conn)
