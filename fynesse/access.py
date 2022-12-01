@@ -707,12 +707,15 @@ def get_pois_by_key(pois, key):
     return pois_by_key[present_keys]
 
 
-def config_price_data():
+def config_credentials():
+    """ Fetch and save credentials from users and set up a database connection.
+    :return: a Connection object to the database
+    """
     # Save credentials
     save_credentials()
 
     # Database url
-    database_details = {"url": "database-ads-yz709.cgrre17yxw11.eu-west-2.rds.amazonaws.com",
+    database_details = {"url": "database-yz709-db.cgrre17yxw11.eu-west-2.rds.amazonaws.com",
                         "port": 3306}
 
     # Get username and password from the yaml file for database access
@@ -727,6 +730,14 @@ def config_price_data():
                              password=credentials["password"],
                              host=database_details["url"],
                              database="property_prices")
+    return conn
+
+
+def config_price_data(conn):
+    """ Config the dataset tables.
+    :param conn: a Connection object
+    :return: None
+    """
 
     # Create a database called `property_prices`
     create_database_property_prices(conn)
