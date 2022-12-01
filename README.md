@@ -6,7 +6,7 @@ The figure below summarised what I have learned and what I have done in this cou
 ### Step 1: Set up a database and upload data to the database
 ### Step 2: Assess OSM features
 ### Step 3: Address house price prediction problem
-```
+```python
 # Install the library
 %pip install git+https://github.com/KyraZzz/fynesse_house_price.git
 # Install the following libraries manually
@@ -37,3 +37,7 @@ score_df = predict_price(latitude, longitude, date, property_type, conn, train_s
                          train_box_width = 0.03, train_box_height = 0.03, diff_lb = 15, diff_ub = 15)
 
 ```
+Here are the results for the above example:
+![image](images/res-1.png)
+![image](images/res-2.png)
+![image](images/res-3.png)

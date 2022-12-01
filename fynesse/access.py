@@ -734,7 +734,7 @@ def config_credentials(url=None, port=None):
 
     # Construct a dataset folder if not exists
     if not os.path.exists("./datasets"):
-        os.makedirs('my_folder')
+        os.makedirs("./datasets")
 
     return username, password, url
 
