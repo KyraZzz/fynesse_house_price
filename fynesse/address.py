@@ -147,8 +147,8 @@ def merge_OSM_features(df, pois_box_width=0.005, pois_box_height=0.005):
     :param pois_box_height: the height of the bounding box for searching POIs
     :return: a dataframe combined the raw train dataset with OSM features
     """
-    if 'lattitude' in df.columns and 'longitude' in df.columns:
-        geo_list = [(float(df.iloc[id]['lattitude']), float(
+    if 'latitude' in df.columns and 'longitude' in df.columns:
+        geo_list = [(float(df.iloc[id]['latitude']), float(
             df.iloc[id]['longitude'])) for id in range(len(df))]
         df_OSM = get_POIs_for_list(geo_list, pois_box_width, pois_box_height)
         return pd.concat((df, df_OSM), axis=1)

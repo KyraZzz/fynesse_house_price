@@ -707,7 +707,7 @@ def get_pois_by_key(pois, key):
     return pois_by_key[present_keys]
 
 
-def config_credentials(url):
+def config_credentials(url=None, port=None):
     """ Fetch and save credentials from users and set up a database connection.
     :param url: URL to connect to database endpoint
     :return: username for database connection
@@ -718,10 +718,14 @@ def config_credentials(url):
     save_credentials()
 
     # Database url
-    database_details = {"url": "database-yz709-db.cgrre17yxw11.eu-west-2.rds.amazonaws.com",
-                        "port": 3306}
+    if url is None or port is None:
+        database_details = {"url": "database-yz709-db.cgrre17yxw11.eu-west-2.rds.amazonaws.com",
+                            "port": 3306}
+    else:
+        database_details = {"url": url,
+                            "port": int(port)}
 
-    # Get username and password from the yaml file for database access
+        # Get username and password from the yaml file for database access
     with open("credentials.yaml") as file:
         credentials = yaml.safe_load(file)
     username = credentials["username"]
@@ -729,7 +733,8 @@ def config_credentials(url):
     url = database_details["url"]
 
     # Construct a dataset folder if not exists
-    os.mkdir("./datasets")
+    if not os.path.exists("./datasets"):
+        os.makedirs('my_folder')
 
     return username, password, url
 
